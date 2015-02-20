@@ -1,0 +1,99 @@
+STEP 0:
+INM:<ADD,R4,R2,R3>,<LD,R6,R7,1>,<SUB,R5,R1,R2>,<LD,R0,R3,3>,<ADD,R1,R7,R2>
+INB:
+AIB:
+LIB:
+ADB:
+REB:
+RGF:<R1,8>,<R2,4>,<R3,2>,<R7,3>
+DAM:<1,4>,<4,15>,<5,6>,<7,2>
+
+STEP 1:
+INM:<LD,R6,R7,1>,<SUB,R5,R1,R2>,<LD,R0,R3,3>,<ADD,R1,R7,R2>
+INB:<ADD,R4,4,2>
+AIB:
+LIB:
+ADB:
+REB:
+RGF:<R1,8>,<R2,4>,<R3,2>,<R7,3>
+DAM:<1,4>,<4,15>,<5,6>,<7,2>
+
+STEP 2:
+INM:<SUB,R5,R1,R2>,<LD,R0,R3,3>,<ADD,R1,R7,R2>
+INB:<LD,R6,3,1>
+AIB:<ADD,R4,4,2>
+LIB:
+ADB:
+REB:
+RGF:<R1,8>,<R2,4>,<R3,2>,<R7,3>
+DAM:<1,4>,<4,15>,<5,6>,<7,2>
+
+STEP 3:
+INM:<LD,R0,R3,3>,<ADD,R1,R7,R2>
+INB:<SUB,R5,8,4>
+AIB:
+LIB:<LD,R6,3,1>
+ADB:
+REB:<R4,6>
+RGF:<R1,8>,<R2,4>,<R3,2>,<R7,3>
+DAM:<1,4>,<4,15>,<5,6>,<7,2>
+
+STEP 4:
+INM:<ADD,R1,R7,R2>
+INB:<LD,R0,2,3>
+AIB:<SUB,R5,8,4>
+LIB:
+ADB:<R6,4>
+REB:
+RGF:<R1,8>,<R2,4>,<R3,2>,<R4,6>,<R7,3>
+DAM:<1,4>,<4,15>,<5,6>,<7,2>
+
+STEP 5:
+INM:
+INB:<ADD,R1,3,4>
+AIB:
+LIB:<LD,R0,2,3>
+ADB:
+REB:<R6,15>,<R5,4>
+RGF:<R1,8>,<R2,4>,<R3,2>,<R4,6>,<R7,3>
+DAM:<1,4>,<4,15>,<5,6>,<7,2>
+
+STEP 6:
+INM:
+INB:
+AIB:<ADD,R1,3,4>
+LIB:
+ADB:<R0,5>
+REB:<R5,4>
+RGF:<R1,8>,<R2,4>,<R3,2>,<R4,6>,<R6,15>,<R7,3>
+DAM:<1,4>,<4,15>,<5,6>,<7,2>
+
+STEP 7:
+INM:
+INB:
+AIB:
+LIB:
+ADB:
+REB:<R0,6>,<R1,7>
+RGF:<R1,8>,<R2,4>,<R3,2>,<R4,6>,<R5,4>,<R6,15>,<R7,3>
+DAM:<1,4>,<4,15>,<5,6>,<7,2>
+
+STEP 8:
+INM:
+INB:
+AIB:
+LIB:
+ADB:
+REB:<R1,7>
+RGF:<R0,6>,<R1,8>,<R2,4>,<R3,2>,<R4,6>,<R5,4>,<R6,15>,<R7,3>
+DAM:<1,4>,<4,15>,<5,6>,<7,2>
+
+STEP 9:
+INM:
+INB:
+AIB:
+LIB:
+ADB:
+REB:
+RGF:<R0,6>,<R1,7>,<R2,4>,<R3,2>,<R4,6>,<R5,4>,<R6,15>,<R7,3>
+DAM:<1,4>,<4,15>,<5,6>,<7,2>

@@ -1,0 +1,435 @@
+package Simulator;
+
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.*;
+import java.util.concurrent.TimeUnit.*;
+/**
+ * @author Abhishek
+ *	On my honor, I have neither given nor received unauthorized aid on this assignment.
+ */
+
+public class PetriNet implements Runnable {
+
+	/**
+	 * @param args
+	 */
+	
+	static int step = 0;
+	static int tokennum = 0 ;
+	
+	final static String rFile = "registers.txt";
+	final static String dFile = "datamemory.txt";
+	final static String iFile = "instructions.txt";
+	final static String resultFile = "simulation.txt";
+	static Charset Encoding = StandardCharsets.UTF_8;
+	
+	public static Writer w = new Writer();
+	public static Registers r = new Registers();
+	public static DataMemory d = new DataMemory();
+	public static ResultBuffer rb = new ResultBuffer();
+	public static AddressBuffer adb = new AddressBuffer();
+	public static ArithmeticBuffer aib = new ArithmeticBuffer();
+	public static InstructionMemory i = new InstructionMemory();
+	public static InstructionBuffer inb = new InstructionBuffer(i);
+	public static LoadInstructionBuffer lib = new LoadInstructionBuffer();
+	
+	
+	
+	static public ArrayList<String> readFile(String filename)throws IOException{
+		Path path = null;
+		try{
+			path = Paths.get(filename);
+			
+		}
+		catch(Exception e){
+			System.out.println("No such file exist");
+		}
+		return (ArrayList<String>) Files.readAllLines(path,Encoding);
+	}
+	
+	
+	public void printData(ArrayList<String> temp){
+		for(String s: temp){
+			System.out.println(s);
+		}
+		System.out.println();
+	}
+//	public void run(){
+//			
+//		ReentrantLock clock = new ReentrantLock();
+//		ReentrantLock lock = new ReentrantLock();
+//		ReentrantLock lock1 = new ReentrantLock();
+//		while(i.instruction.size()> 0){
+//			 try{
+//				 
+//				 petriprocess();
+//	
+//			 }
+//			 catch(Exception e){
+//				 
+//			 }
+//			 
+//		}
+//	}
+//	void petriprocess() throws IOException{
+//		
+//		//clock.lock();
+//		
+//			System.out.println(i.instruction.get(0));
+//			i.decodeInstruction(0,r,i);
+//			inb.setInstructionBuffer();
+//			w.writeInFile();
+//		
+//		//clock.unlock();
+//		
+//		
+//		
+//		if(inb.isArithmetic()){
+//			//lock.lock();
+//			aib.setMyInstructions(inb);
+//			i.decodeInstruction(0,r,i);
+//			inb.setInstructionBuffer();
+//			w.writeInFile();
+//			aib.asu();
+//			rb.setResultWithAIB(aib,r);
+//			
+//			
+//			w.writeInFile();
+//			r.addNewData(rb);
+//			w.writeInFile();
+//			//lock.unlock();
+//			
+//		}
+//		else{
+//			//lock1.lock();
+//			System.out.println("In load ..");
+//			lib.setMyInstructions(inb);
+//			i.decodeInstruction(0,r,i);
+//			inb.setInstructionBuffer();
+//			w.writeInFile();
+//			lib.addr();
+//			adb.setMyInstructions(lib);
+//			w.writeInFile();
+//			adb.setAddressValue(d);
+//			rb.setResultWithADB(adb,r);
+//			w.writeInFile();
+//			r.addNewData(rb);
+//			w.writeInFile();
+//			//lock1.unlock();
+//			
+//		}
+//		
+//
+//		
+//		
+//	}
+	public static void main(String[] args) throws IOException {
+		// TODO Auto-generated method stub
+		
+		/**
+		 *  Read the file
+		 */
+		//ScheduledThreadPoolExecutor pool = new ScheduledThreadPoolExecutor(4);
+		//Runnable p = new PetriNet();
+		PetriNet p1 = new PetriNet();
+		//Runnable p2 = new PetriNet();
+		ArrayList<String> instructionList = readFile(iFile);
+		ArrayList<String> registerList = readFile(rFile);
+		ArrayList<String> dataList = readFile(dFile);
+		//Thread t = new Thread(p);
+		w.setWriter(i,r,inb,aib,rb,d,lib,adb);
+		i.setInstruction(instructionList);
+		r.setMyValues(registerList);
+		d.setMyValues(dataList);
+		w.writeInFile();
+		//pool.scheduleAtFixedRate(p1, 0, 1, TimeUnit.MILLISECONDS);
+		//t.start();
+		//new Thread (p2).start();
+
+		System.out.println("end");
+
+	}
+	
+
+}
+class Writer{
+	PetriNet p = new PetriNet();
+	Object i,r,inb,aib,rb,d,lib,adb;
+	 void setWriter(Object o1,Object o2,Object o3,Object o4,Object o5,Object o6,Object o7,Object o8){
+		this.i = o1;
+		this.r = o2;
+		this.inb = o3;
+		this.aib = o4;
+		this.rb = o5;
+		this.d = o6;
+		this.lib = o7;
+		this.adb = o8;
+	}
+	public  void writeInFile()throws IOException{
+	
+		FileWriter output = new FileWriter(p.resultFile,true);
+		try(BufferedWriter w = new BufferedWriter(output)){
+			w.write("Step "+p.step+":");
+			w.newLine();
+			w.write("INM:"+((InstructionMemory) i).state());
+			w.newLine();
+			w.write("INB:"+((InstructionBuffer) inb).state());
+			w.newLine();
+			w.write("AIB:"+((ArithmeticBuffer) aib).state());
+			w.newLine();
+			w.write("LIB:"+((LoadInstructionBuffer) lib).state());
+			w.newLine();
+			w.write("ADB:"+((AddressBuffer) adb).state());
+			w.newLine();
+			w.write("REB:"+((ResultBuffer) rb).state());
+			w.newLine();
+			List<String> temp = ((Registers) r).state();
+			Collections.sort(temp);
+			w.write("RGF:"+temp); 
+			w.newLine();
+			w.write("DAM:"+((DataMemory) d).state()+"\n");
+			w.newLine();
+			p.step++;
+			
+			//w.close();
+		}
+	}
+}
+
+class common{
+	
+	String instruction = "";
+	String operation = "";
+	String result = "";
+	String operand1 = "";
+	String operand2 = "";
+	
+	public void setMyInstructions(Object inb){
+		instruction = ((InstructionBuffer)inb).instruction;
+		operation = ((InstructionBuffer)inb).operation;
+		result = ((InstructionBuffer)inb).result;
+		operand1 = ((InstructionBuffer)inb).operand1;
+		operand2 = ((InstructionBuffer)inb).operand2;
+		((InstructionBuffer)inb).instruction = "";
+		
+	}
+	public List<String> state(){
+		List<String> temp = new ArrayList<>();
+		temp.add(instruction);
+		return temp;
+	}
+}
+
+class AddressBuffer extends common{
+	// we need to copy all from load buffer since we have to perform operations here.
+	String resultOp;
+	public void setMyInstructions(Object lib ){
+		instruction = "<"+((LoadInstructionBuffer)lib).result+","+((LoadInstructionBuffer)lib).resultOp+">";
+		System.out.println(instruction);
+		operation = ((LoadInstructionBuffer)lib).operation;
+		result = ((LoadInstructionBuffer)lib).result;
+		operand1 = ((LoadInstructionBuffer)lib).resultOp;
+		// make remove mechanism that removes all values in common after a transition is executed.
+		((LoadInstructionBuffer)lib).instruction = "";
+	}
+	public void setAddressValue(Object d ){
+		resultOp = ((DataMemory) d).valuesMap.get(operand1)+"";
+		
+	}
+}
+class ResultBuffer extends common{
+	// make it adaptable according to aib and adb.
+	public void setResultWithAIB(Object aib, Object r){
+
+			instruction = "<"+((ArithmeticBuffer)aib).result+","+((ArithmeticBuffer)aib).resultOp+">";
+			System.out.println(instruction);
+			result = ((ArithmeticBuffer)aib).result;
+			operand1 = ((ArithmeticBuffer)aib).resultOp;
+			// make remove mechanism that removes all values in common after a transition is executed.
+			((ArithmeticBuffer)aib).instruction = "";
+			// after the clearing mechanism and locks if present.			
+	}
+	public void setResultWithADB(Object adb, Object r){
+
+		instruction = "<"+((AddressBuffer)adb).result+","+((AddressBuffer)adb).resultOp+">";
+		System.out.println(instruction);
+		result = ((AddressBuffer)adb).result;
+		operand1 = ((AddressBuffer)adb).resultOp;
+		// make remove mechanism that removes all values in common after a transition is executed.
+		((AddressBuffer)adb).instruction = "";
+
+	}
+	public void clearResult(){
+		instruction ="";
+	}
+
+}
+
+class LoadInstructionBuffer extends common{
+	// set my instruction is being done by common where everything is set.
+	String resultOp;
+	void addr(){
+		resultOp =  (Integer.parseInt(operand1)+Integer.parseInt(operand2))+"";
+	}
+}
+
+class ArithmeticBuffer extends common{
+	// set my instruction is being done by common where everything is set.
+	String resultOp ="";
+	
+	void asu(){
+		if(operation.equals("ADD"))
+			resultOp = (Integer.parseInt(operand1)+Integer.parseInt(operand2))+"";
+		else if(operation.equals("SUB")){
+			resultOp = (Integer.parseInt(operand1)-Integer.parseInt(operand2))+"";
+		}
+			
+	}
+}
+
+class InstructionBuffer extends common {
+	
+	InstructionMemory i; 
+	PetriNet p = new PetriNet();
+	//String inbString ="";
+
+	InstructionBuffer(InstructionMemory i){
+		 this.i = i;
+	}
+	
+	Boolean isArithmetic(){
+		return (( operation.equals("ADD") )|| (operation.equals("SUB")));
+	}
+	
+	public  void  setInstructionBuffer() throws IOException{
+		instruction = i.instruction.get(0);
+		operation = i.operation.get(0);
+		result = i.result.get(0);
+		operand1 = i.operand1.get(0);
+		operand2 = i.operand2.get(0);
+		removeInstructionFromMemory();
+		p.tokennum++;
+		System.out.println("Tokennum "+p.tokennum);
+		
+	}
+	void removeInstructionFromMemory(){
+		i.instruction.remove(0);
+		i.operation.remove(0);
+		i.result.remove(0);
+		i.operand1.remove(0);
+		i.operand2.remove(0);
+	}
+
+}
+class Maincommon{
+	
+	ArrayList<String> instruction = new ArrayList<String>();
+	ArrayList<String> operation = new ArrayList<String>();
+	ArrayList<String> result = new ArrayList<String>();
+	ArrayList<String> operand1 = new ArrayList<String>();
+	ArrayList<String> operand2 = new ArrayList<String>();
+	HashMap<String,Integer> valuesMap = new HashMap<String,Integer>();
+	
+	void setMyValues(ArrayList<String>list){
+		
+		for(int j= 0;j < list.size();j++){
+			instruction.add( list.get(j));
+			String str = instruction.get(j);
+			int pos = str.indexOf(",");
+			valuesMap.put(str.substring(str.indexOf("<")+1, pos ), Integer.parseInt(str.substring(pos+1, str.indexOf(">")) ));	
+		}
+		showMyValues();
+		
+	}
+	void showMyValues(){
+		for(String Key : valuesMap.keySet()){
+			System.out.println(Key+" "+valuesMap.get(Key));
+		}
+	}
+	
+	public List<String> state(){
+		List<String> temp = new ArrayList<>();
+		for(int i=0;i< instruction.size();i++){
+			temp.add(instruction.get(i));
+		}
+		
+		return temp;
+	}
+}
+
+class InstructionMemory extends Maincommon {
+
+	public void setInstruction(ArrayList<String>list){
+		if(list.size()<=8){
+			for(int j= 0;j < list.size();j++){
+				instruction.add(list.get(j));
+				String str = instruction.get(j);		
+				int pos = str.indexOf(",");
+				operation.add(str.substring(str.indexOf("<")+1, pos ));
+				result.add( str.substring(pos+1, str.indexOf(",",pos+1) ));
+				pos = str.indexOf(",",pos+1);
+				operand1.add( str.substring(pos+1 , str.indexOf(",",pos+1)) );
+				pos = str.indexOf(",",pos+1);
+				operand2.add( str.substring(pos+1 , str.indexOf(">",pos+1)));
+				System.out.println(operation.get(j)+" "+result.get(j)+" "+operand1.get(j)+" "+operand2.get(j));
+				System.out.println();
+			}
+		}
+		else{
+			System.out.println("Instructions token cannot be more than 8");
+		}
+		
+		
+	}
+	public void  decodeInstruction(int tokennum,Registers r,InstructionMemory i ) throws IOException{
+		System.out.println("Tokennum "+tokennum);
+		System.out.println(instruction.get(0)+".....printing ");
+		if((operation.get(0).equals("ADD"))||(operation.get(0).equals("SUB"))){
+			String op1 = operand1.get(0);
+			String op2 = operand2.get(0);
+			String newOp1 = instruction.get(0).replace(op1, (r.valuesMap.get(op1)).toString() );
+			instruction.set(0, newOp1);
+			// handle null pointer exception
+			String newOp2 = instruction.get(0).replace(op2, (r.valuesMap.get(op2)).toString() );
+			instruction.set(0,newOp2);
+			operand1.set(0, (r.valuesMap.get(op1)).toString());
+			operand2.set(0, (r.valuesMap.get(op2)).toString());
+		}
+		else{
+			String op1 = operand1.get(0);
+			String newOp1 = instruction.get(0).replace(op1, (r.valuesMap.get(op1)).toString() );
+			instruction.set(0, newOp1);
+			operand1.set(0, (r.valuesMap.get(op1)).toString());
+		}
+		
+		
+		
+	}
+
+}
+
+class Registers extends Maincommon{
+	
+	void addNewData(Object rb){
+		instruction.add( ((ResultBuffer)rb).instruction );
+		valuesMap.put( ((ResultBuffer)rb).result ,Integer.parseInt(((ResultBuffer)rb).operand1));
+		((ResultBuffer)rb).clearResult(); // add value and then clear from buffer
+	}
+}
+
+class DataMemory extends Maincommon{
+	
+}
